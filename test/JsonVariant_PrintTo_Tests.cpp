@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
 #include <ArduinoJson.h>
@@ -42,7 +43,7 @@ TEST_F(JsonVariant_PrintTo_Tests, DoubleDefaultDigits) {
 }
 
 TEST_F(JsonVariant_PrintTo_Tests, DoubleFourDigits) {
-  variant.set(3.14159265358979323846, 4);
+  variant = JsonVariant(3.14159265358979323846, 4);
   outputMustBe("3.1416");
 }
 

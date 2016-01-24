@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
 #include <ArduinoJson.h>
@@ -21,12 +22,12 @@ class JsonParser_Object_Test : public testing::Test {
   void sizeMustBe(int expected) { EXPECT_EQ(expected, _object->size()); }
 
   void keyMustHaveValue(const char *key, const char *expected) {
-    EXPECT_STREQ(expected, _object->at(key).as<const char *>());
+    EXPECT_STREQ(expected, (*_object)[key]);
   }
 
   template <typename T>
   void keyMustHaveValue(const char *key, T expected) {
-    EXPECT_EQ(expected, _object->at(key).as<T>());
+    EXPECT_EQ(expected, (*_object)[key].as<T>());
   }
 
  private:
@@ -70,6 +71,13 @@ TEST_F(JsonParser_Object_Test, OneString) {
 
 TEST_F(JsonParser_Object_Test, OneStringSingleQuotes) {
   whenInputIs("{'key':'value'}");
+  parseMustSucceed();
+  sizeMustBe(1);
+  keyMustHaveValue("key", "value");
+}
+
+TEST_F(JsonParser_Object_Test, OneStringNoQuotes) {
+  whenInputIs("{key:value}");
   parseMustSucceed();
   sizeMustBe(1);
   keyMustHaveValue("key", "value");

@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
 #include <ArduinoJson.h>
@@ -16,9 +17,12 @@ class JsonArray_PrintTo_Tests : public testing::Test {
   JsonArray &array;
 
   void outputMustBe(const char *expected) {
-    size_t n = array.printTo(buffer, sizeof(buffer));
+    size_t actualLen = array.printTo(buffer, sizeof(buffer));
+    size_t measuredLen = array.measureLength();
+
     EXPECT_STREQ(expected, buffer);
-    EXPECT_EQ(strlen(expected), n);
+    EXPECT_EQ(strlen(expected), actualLen);
+    EXPECT_EQ(strlen(expected), measuredLen);
   }
 
  private:
@@ -60,7 +64,7 @@ TEST_F(JsonArray_PrintTo_Tests, OneDoubleDefaultDigits) {
 }
 
 TEST_F(JsonArray_PrintTo_Tests, OneDoubleFourDigits) {
-  array.add(3.14159265358979323846, 4);
+  array.add(double_with_n_digits(3.14159265358979323846, 4));
   outputMustBe("[3.1416]");
 }
 

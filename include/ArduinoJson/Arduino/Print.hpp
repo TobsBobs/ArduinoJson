@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #pragma once
 
@@ -11,7 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// This class reproduces Arduino's Print
+// This class reproduces Arduino's Print class
 class Print {
  public:
   virtual ~Print() {}
@@ -20,6 +21,7 @@ class Print {
 
   size_t print(const char[]);
   size_t print(double, int = 2);
+  size_t print(int);
   size_t print(long);
   size_t println();
 };

@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
 #include <ArduinoJson.h>
@@ -11,13 +12,13 @@ class JsonVariant_Storage_Tests : public ::testing::Test {
  protected:
   template <typename T>
   void testValue(T expected) {
-    _actual.set(expected);
+    _actual = expected;
     EXPECT_EQ(expected, _actual.as<T>());
   }
 
   template <typename T>
   void testReference(T &expected) {
-    _actual.set(expected);
+    _actual = expected;
     EXPECT_EQ(expected, _actual.as<T &>());
   }
 

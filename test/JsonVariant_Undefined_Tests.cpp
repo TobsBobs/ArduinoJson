@@ -1,21 +1,18 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
+#define ARDUINOJSON_ENABLE_STD_STREAM
 #include <ArduinoJson.h>
-#include "Printers.hpp"
 
 class JsonVariant_Undefined_Tests : public ::testing::Test {
  protected:
   JsonVariant variant;
 };
-
-TEST_F(JsonVariant_Undefined_Tests, SuccessReturnsFalse) {
-  EXPECT_FALSE(variant.success());
-}
 
 TEST_F(JsonVariant_Undefined_Tests, AsLongReturns0) {
   EXPECT_EQ(0, variant.as<long>());
@@ -34,39 +31,25 @@ TEST_F(JsonVariant_Undefined_Tests, AsBoolReturnsFalse) {
 }
 
 TEST_F(JsonVariant_Undefined_Tests, AsArrayReturnInvalid) {
-  EXPECT_EQ(JsonArray::invalid(), variant.asArray());
+  EXPECT_EQ(JsonArray::invalid(), variant.as<JsonArray&>());
+}
+
+TEST_F(JsonVariant_Undefined_Tests, AsConstArrayReturnInvalid) {
+  EXPECT_EQ(JsonArray::invalid(), variant.as<const JsonArray&>());
 }
 
 TEST_F(JsonVariant_Undefined_Tests, AsObjectReturnInvalid) {
+  EXPECT_EQ(JsonObject::invalid(), variant.as<JsonObject&>());
+}
+
+TEST_F(JsonVariant_Undefined_Tests, AsConstObjectReturnInvalid) {
+  EXPECT_EQ(JsonObject::invalid(), variant.as<const JsonObject&>());
+}
+
+TEST_F(JsonVariant_Undefined_Tests, AsArrayWrapperReturnInvalid) {
+  EXPECT_EQ(JsonArray::invalid(), variant.asArray());
+}
+
+TEST_F(JsonVariant_Undefined_Tests, AsObjectWrapperReturnInvalid) {
   EXPECT_EQ(JsonObject::invalid(), variant.asObject());
-}
-
-TEST_F(JsonVariant_Undefined_Tests, CanBeSetToLong) {
-  variant = 0L;
-  EXPECT_TRUE(variant.success());
-}
-
-TEST_F(JsonVariant_Undefined_Tests, CanBeSetToDouble) {
-  variant = 0.0;
-  EXPECT_TRUE(variant.success());
-}
-
-TEST_F(JsonVariant_Undefined_Tests, CanBeSetToString) {
-  variant = static_cast<const char*>(NULL);
-  EXPECT_TRUE(variant.success());
-}
-
-TEST_F(JsonVariant_Undefined_Tests, CanBeSetToBool) {
-  variant = false;
-  EXPECT_TRUE(variant.success());
-}
-
-TEST_F(JsonVariant_Undefined_Tests, CanBeSetToArray) {
-  variant = JsonArray::invalid();
-  EXPECT_TRUE(variant.success());
-}
-
-TEST_F(JsonVariant_Undefined_Tests, CanBeSetToObject) {
-  variant = JsonObject::invalid();
-  EXPECT_TRUE(variant.success());
 }

@@ -1,15 +1,15 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #pragma once
 
 #include "../JsonBuffer.hpp"
 #include "ListConstIterator.hpp"
 #include "ListIterator.hpp"
-#include "PlacementNew.hpp"
 
 namespace ArduinoJson {
 namespace Internals {
@@ -40,7 +40,7 @@ class List {
 
   // Returns the numbers of elements in the list.
   // For a JsonObject, it would return the number of key-value pairs
-  int size() const;
+  size_t size() const;
 
   iterator begin() { return iterator(_firstNode); }
   iterator end() { return iterator(NULL); }
@@ -49,22 +49,7 @@ class List {
   const_iterator end() const { return const_iterator(NULL); }
 
  protected:
-  node_type *createNode() {
-    if (!_buffer) return NULL;
-    void *ptr = _buffer->alloc(sizeof(node_type));
-    return ptr ? new (ptr) node_type() : NULL;
-  }
-
-  void addNode(node_type *nodeToAdd) {
-    if (_firstNode) {
-      node_type *lastNode = _firstNode;
-      while (lastNode->next) lastNode = lastNode->next;
-      lastNode->next = nodeToAdd;
-    } else {
-      _firstNode = nodeToAdd;
-    }
-  }
-
+  node_type *addNewNode();
   void removeNode(node_type *nodeToRemove);
 
   JsonBuffer *_buffer;

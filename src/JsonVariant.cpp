@@ -1,108 +1,139 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include "../include/ArduinoJson/JsonVariant.hpp"
 
 #include "../include/ArduinoJson/JsonArray.hpp"
 #include "../include/ArduinoJson/JsonObject.hpp"
 
-using namespace ArduinoJson;
+#include <errno.h>   // for errno
+#include <stdlib.h>  // for strtol, strtod
+
 using namespace ArduinoJson::Internals;
 
-JsonVariant JsonVariant::_invalid(JSON_INVALID);
+namespace ArduinoJson {
 
-JsonVariant::operator JsonArray &() const {
-  return _type == JSON_ARRAY ? *_content.asArray : JsonArray::invalid();
+template <typename TFloat>
+static TFloat parse(const char *);
+
+template <>
+float parse<float>(const char *s) {
+  return static_cast<float>(strtod(s, NULL));
 }
 
-JsonVariant::operator JsonObject &() const {
-  return _type == JSON_OBJECT ? *_content.asObject : JsonObject::invalid();
+template <>
+double parse<double>(const char *s) {
+  return strtod(s, NULL);
 }
 
-JsonVariant::operator bool() const {
-  return _type == JSON_BOOLEAN ? _content.asBoolean : false;
+template <>
+long parse<long>(const char *s) {
+  return strtol(s, NULL, 10);
 }
 
-JsonVariant::operator const char *() const {
-  return _type == JSON_STRING ? _content.asString : NULL;
+template <>
+int parse<int>(const char *s) {
+  return atoi(s);
 }
 
-JsonVariant::operator double() const {
-  return _type >= JSON_DOUBLE_0_DECIMALS ? _content.asDouble : 0;
+template <>
+const char *JsonVariant::as<const char *>() const {
+  if (_type == JSON_UNPARSED && _content.asString &&
+      !strcmp("null", _content.asString))
+    return NULL;
+  if (_type == JSON_STRING || _type == JSON_UNPARSED) return _content.asString;
+  return NULL;
 }
 
-JsonVariant::operator long() const {
-  return _type == JSON_LONG ? _content.asLong : 0;
+JsonFloat JsonVariant::asFloat() const {
+  if (_type >= JSON_FLOAT_0_DECIMALS) return _content.asFloat;
+
+  if (_type == JSON_INTEGER || _type == JSON_BOOLEAN)
+    return static_cast<JsonFloat>(_content.asInteger);
+
+  if ((_type == JSON_STRING || _type == JSON_UNPARSED) && _content.asString)
+    return parse<JsonFloat>(_content.asString);
+
+  return 0.0;
 }
 
-void JsonVariant::set(bool value) {
-  if (_type == JSON_INVALID) return;
-  _type = Internals::JSON_BOOLEAN;
-  _content.asBoolean = value;
+JsonInteger JsonVariant::asInteger() const {
+  if (_type == JSON_INTEGER || _type == JSON_BOOLEAN) return _content.asInteger;
+
+  if (_type >= JSON_FLOAT_0_DECIMALS)
+    return static_cast<JsonInteger>(_content.asFloat);
+
+  if ((_type == JSON_STRING || _type == JSON_UNPARSED) && _content.asString) {
+    if (!strcmp("true", _content.asString)) return 1;
+    return parse<JsonInteger>(_content.asString);
+  }
+
+  return 0L;
 }
 
-void JsonVariant::set(const char *value) {
-  if (_type == JSON_INVALID) return;
-  _type = JSON_STRING;
-  _content.asString = value;
+template <>
+String JsonVariant::as<String>() const {
+  String s;
+  if ((_type == JSON_STRING || _type == JSON_UNPARSED) &&
+      _content.asString != NULL)
+    s = _content.asString;
+  else
+    printTo(s);
+  return s;
 }
 
-void JsonVariant::set(double value, uint8_t decimals) {
-  if (_type == JSON_INVALID) return;
-  _type = static_cast<JsonVariantType>(JSON_DOUBLE_0_DECIMALS + decimals);
-  _content.asDouble = value;
+template <>
+bool JsonVariant::is<signed long>() const {
+  if (_type == JSON_INTEGER) return true;
+
+  if (_type != JSON_UNPARSED || _content.asString == NULL) return false;
+
+  char *end;
+  errno = 0;
+  strtol(_content.asString, &end, 10);
+
+  return *end == '\0' && errno == 0;
 }
 
-void JsonVariant::set(long value) {
-  if (_type == JSON_INVALID) return;
-  _type = JSON_LONG;
-  _content.asLong = value;
-}
+template <>
+bool JsonVariant::is<double>() const {
+  if (_type >= JSON_FLOAT_0_DECIMALS) return true;
 
-void JsonVariant::set(JsonArray &array) {
-  if (_type == JSON_INVALID) return;
-  _type = JSON_ARRAY;
-  _content.asArray = &array;
-}
+  if (_type != JSON_UNPARSED || _content.asString == NULL) return false;
 
-void JsonVariant::set(JsonObject &object) {
-  if (_type == JSON_INVALID) return;
-  _type = JSON_OBJECT;
-  _content.asObject = &object;
-}
+  char *end;
+  errno = 0;
+  strtod(_content.asString, &end);
 
-size_t JsonVariant::size() const {
-  if (_type == JSON_ARRAY) return _content.asArray->size();
-  if (_type == JSON_OBJECT) return _content.asObject->size();
-  return 0;
-}
-
-JsonVariant &JsonVariant::operator[](int index) {
-  if (_type != JSON_ARRAY) return JsonVariant::invalid();
-  return _content.asArray->operator[](index);
-}
-
-JsonVariant &JsonVariant::operator[](const char *key) {
-  if (_type != JSON_OBJECT) return JsonVariant::invalid();
-  return _content.asObject->operator[](key);
+  return *end == '\0' && errno == 0 && !is<long>();
 }
 
 void JsonVariant::writeTo(JsonWriter &writer) const {
-  if (is<const JsonArray &>())
-    as<const JsonArray &>().writeTo(writer);
-  else if (is<const JsonObject &>())
-    as<const JsonObject &>().writeTo(writer);
-  else if (is<const char *>())
-    writer.writeString(as<const char *>());
-  else if (is<long>())
-    writer.writeLong(as<long>());
-  else if (is<bool>())
-    writer.writeBoolean(as<bool>());
-  else if (is<double>()) {
-    uint8_t decimals = static_cast<uint8_t>(_type - JSON_DOUBLE_0_DECIMALS);
-    writer.writeDouble(as<double>(), decimals);
+  if (_type == JSON_ARRAY)
+    _content.asArray->writeTo(writer);
+
+  else if (_type == JSON_OBJECT)
+    _content.asObject->writeTo(writer);
+
+  else if (_type == JSON_STRING)
+    writer.writeString(_content.asString);
+
+  else if (_type == JSON_UNPARSED)
+    writer.writeRaw(_content.asString);
+
+  else if (_type == JSON_INTEGER)
+    writer.writeInteger(_content.asInteger);
+
+  else if (_type == JSON_BOOLEAN)
+    writer.writeBoolean(_content.asInteger != 0);
+
+  else if (_type >= JSON_FLOAT_0_DECIMALS) {
+    uint8_t decimals = static_cast<uint8_t>(_type - JSON_FLOAT_0_DECIMALS);
+    writer.writeFloat(_content.asFloat, decimals);
   }
+}
 }

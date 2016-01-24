@@ -1,18 +1,19 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
-#include <ArduinoJson/Internals/StringBuilder.hpp>
+#include <ArduinoJson/Internals/StaticStringBuilder.hpp>
 
 using namespace ArduinoJson::Internals;
 
 class StringBuilderTests : public testing::Test {
  protected:
   virtual void SetUp() {
-    _stringBuilder = new StringBuilder(_buffer, sizeof(_buffer));
+    _stringBuilder = new StaticStringBuilder(_buffer, sizeof(_buffer));
   }
 
   virtual void TearDown() { delete _stringBuilder; }

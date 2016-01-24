@@ -1,9 +1,18 @@
-file(GLOB_RECURSE INC_FILES ../include/*.hpp)
-file(GLOB_RECURSE SRC_FILES *.cpp)
+# Copyright Benoit Blanchon 2014-2016
+# MIT License
+# 
+# Arduino JSON library
+# https://github.com/bblanchon/ArduinoJson
+# If you like this project, please add a star!
+
+file(GLOB_RECURSE HPP_FILES ../include/*.hpp)
+file(GLOB_RECURSE IPP_FILES ../include/*.ipp)
+file(GLOB_RECURSE CPP_FILES *.cpp)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 	add_definitions(
 		-fno-exceptions
+		-fno-rtti
 		-pedantic
 		-Wall
 		-Wcast-align
@@ -42,7 +51,16 @@ endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	add_definitions(
 		-Wc++11-compat
+		-Wdeprecated-register
 	)
 endif()
 
-add_library(ArduinoJson ${SRC_FILES} ${INC_FILES})
+if(MSVC)
+	add_definitions(
+		-D_CRT_SECURE_NO_WARNINGS
+		-W4)
+endif()
+
+add_library(ArduinoJson ${CPP_FILES} ${HPP_FILES} ${IPP_FILES})
+
+target_include_directories(ArduinoJson INTERFACE ${CMAKE_CURRENT_LIST_DIR}/../include)

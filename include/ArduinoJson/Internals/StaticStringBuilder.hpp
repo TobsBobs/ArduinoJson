@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #pragma once
 
@@ -12,9 +13,9 @@ namespace ArduinoJson {
 namespace Internals {
 
 // A Print implementation that allows to write in a char[]
-class StringBuilder : public Print {
+class StaticStringBuilder : public Print {
  public:
-  StringBuilder(char *buf, int size)
+  StaticStringBuilder(char *buf, size_t size)
       : buffer(buf), capacity(size - 1), length(0) {
     buffer[0] = '\0';
   }
@@ -23,8 +24,8 @@ class StringBuilder : public Print {
 
  private:
   char *buffer;
-  int capacity;
-  int length;
+  size_t capacity;
+  size_t length;
 };
 }
 }

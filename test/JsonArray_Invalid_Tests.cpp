@@ -1,15 +1,12 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
 #include <ArduinoJson.h>
-
-TEST(JsonArray_Invalid_Tests, AtFails) {
-  ASSERT_FALSE(JsonArray::invalid().at(0).success());
-}
 
 TEST(JsonArray_Invalid_Tests, SubscriptFails) {
   ASSERT_FALSE(JsonArray::invalid()[0].success());

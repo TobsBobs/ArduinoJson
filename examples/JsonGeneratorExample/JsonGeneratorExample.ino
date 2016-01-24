@@ -1,13 +1,17 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <ArduinoJson.h>
 
 void setup() {
   Serial.begin(9600);
+  while (!Serial) {
+    // wait serial port initialization
+  }
 
   StaticJsonBuffer<200> jsonBuffer;
 
@@ -16,8 +20,8 @@ void setup() {
   root["time"] = 1351824120;
 
   JsonArray& data = root.createNestedArray("data");
-  data.add(48.756080, 6);  // 6 is the number of decimals to print
-  data.add(2.302038, 6);   // if not specified, 2 digits are printed
+  data.add(double_with_n_digits(48.756080, 6));
+  data.add(double_with_n_digits(2.302038, 6));
 
   root.printTo(Serial);
   // This prints:

@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
 #include <ArduinoJson.h>
@@ -44,13 +45,6 @@ TEST_F(JsonVariant_Subscript_Tests, Object) {
 
 TEST_F(JsonVariant_Subscript_Tests, Undefined) {
   _variant = JsonVariant();
-  EXPECT_EQ(0, _variant.size());
-  EXPECT_FALSE(_variant["0"].success());
-  EXPECT_FALSE(_variant[0].success());
-}
-
-TEST_F(JsonVariant_Subscript_Tests, Invalid) {
-  _variant = JsonVariant::invalid();
   EXPECT_EQ(0, _variant.size());
   EXPECT_FALSE(_variant["0"].success());
   EXPECT_FALSE(_variant[0].success());

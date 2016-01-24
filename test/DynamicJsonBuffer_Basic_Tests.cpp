@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
 
@@ -20,44 +21,24 @@ TEST_F(DynamicJsonBuffer_Basic_Tests, InitialSizeIsZero) {
   ASSERT_EQ(0, buffer.size());
 }
 
-TEST_F(DynamicJsonBuffer_Basic_Tests, InitialBlockCountIsOne) {
-  ASSERT_EQ(1, buffer.blockCount());
-}
-
 TEST_F(DynamicJsonBuffer_Basic_Tests, SizeIncreasesAfterAlloc) {
   buffer.alloc(1);
-  ASSERT_EQ(1, buffer.size());
+  ASSERT_LE(1U, buffer.size());
   buffer.alloc(1);
-  ASSERT_EQ(2, buffer.size());
-  buffer.alloc(DynamicJsonBuffer::BLOCK_CAPACITY);
-  ASSERT_EQ(2 + DynamicJsonBuffer::BLOCK_CAPACITY, buffer.size());
-}
-
-TEST_F(DynamicJsonBuffer_Basic_Tests, BlockCountDoesntChangeWhenNotFull) {
-  buffer.alloc(DynamicJsonBuffer::BLOCK_CAPACITY);
-  ASSERT_EQ(1, buffer.blockCount());
-}
-
-TEST_F(DynamicJsonBuffer_Basic_Tests, BlockCountChangesWhenFull) {
-  buffer.alloc(DynamicJsonBuffer::BLOCK_CAPACITY);
-  buffer.alloc(1);
-  ASSERT_EQ(2, buffer.blockCount());
-}
-
-TEST_F(DynamicJsonBuffer_Basic_Tests, CanAllocLessThanBlockCapacity) {
-  void* p1 = buffer.alloc(DynamicJsonBuffer::BLOCK_CAPACITY);
-  ASSERT_TRUE(p1);
-  void* p2 = buffer.alloc(DynamicJsonBuffer::BLOCK_CAPACITY);
-  ASSERT_TRUE(p2);
-}
-
-TEST_F(DynamicJsonBuffer_Basic_Tests, CantAllocMoreThanBlockCapacity) {
-  void* p = buffer.alloc(DynamicJsonBuffer::BLOCK_CAPACITY + 1);
-  ASSERT_FALSE(p);
+  ASSERT_LE(2U, buffer.size());
 }
 
 TEST_F(DynamicJsonBuffer_Basic_Tests, ReturnDifferentPointer) {
   void* p1 = buffer.alloc(1);
   void* p2 = buffer.alloc(2);
   ASSERT_NE(p1, p2);
+}
+
+TEST_F(DynamicJsonBuffer_Basic_Tests, Alignment) {
+  size_t mask = sizeof(void*) - 1;
+
+  for (size_t size = 1; size <= sizeof(void*); size++) {
+    size_t addr = reinterpret_cast<size_t>(buffer.alloc(1));
+    ASSERT_EQ(0, addr & mask);
+  }
 }

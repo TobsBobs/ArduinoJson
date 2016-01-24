@@ -1,12 +1,13 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include <gtest/gtest.h>
+#define ARDUINOJSON_ENABLE_STD_STREAM
 #include <ArduinoJson/JsonVariant.hpp>
-#include "Printers.hpp"
 
 using namespace ArduinoJson;
 

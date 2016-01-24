@@ -1,8 +1,9 @@
-// Copyright Benoit Blanchon 2014
+// Copyright Benoit Blanchon 2014-2016
 // MIT License
 //
 // Arduino JSON library
 // https://github.com/bblanchon/ArduinoJson
+// If you like this project, please add a star!
 
 #include "../include/ArduinoJson/JsonArray.hpp"
 
@@ -14,19 +15,10 @@ using namespace ArduinoJson::Internals;
 
 JsonArray JsonArray::_invalid(NULL);
 
-JsonVariant &JsonArray::at(int index) const {
+JsonArray::node_type *JsonArray::getNodeAt(size_t index) const {
   node_type *node = _firstNode;
   while (node && index--) node = node->next;
-  return node ? node->content : JsonVariant::invalid();
-}
-
-JsonVariant &JsonArray::add() {
-  node_type *node = createNode();
-  if (!node) return JsonVariant::invalid();
-
-  addNode(node);
-
-  return node->content;
+  return node;
 }
 
 JsonArray &JsonArray::createNestedArray() {
@@ -42,6 +34,8 @@ JsonObject &JsonArray::createNestedObject() {
   add(object);
   return object;
 }
+
+void JsonArray::removeAt(size_t index) { removeNode(getNodeAt(index)); }
 
 void JsonArray::writeTo(JsonWriter &writer) const {
   writer.beginArray();
